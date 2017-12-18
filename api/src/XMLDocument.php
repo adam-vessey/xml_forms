@@ -2,7 +2,7 @@
 
 namespace Drupal\xml_form_api;
 
-use Drupal\xml_schema_api\Schema;
+module_load_include('inc', 'xml_schema_api', 'Schema');
 
 use DOMDocument;
 use DOMElement;
