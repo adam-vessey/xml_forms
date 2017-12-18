@@ -7,6 +7,8 @@ use DOMDocument;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
+use Drupal\xml_form_builder\XMLFormRepository;
+
 /**
  * Form for creating an XML form.
  */
@@ -111,12 +113,11 @@ class XmlFormBuilderCreate extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $form_state->loadInclude('xml_form_api', 'inc', 'XMLFormDefinition');
-    $form_state->loadInclude('xml_form_builder', 'inc', 'XMLFormRepository');
     $form_name = $form_state->getValue(['form_name']);
     if ($form_state->getTriggeringElement()['#name'] == 'create') {
       $definition = xml_form_builder_create_get_uploaded_file();
       $definition = $definition ? $definition : xml_form_api_get_empty_form_definition();
-      if (\XMLFormRepository::Create($form_name, $definition)) {
+      if (XMLFormRepository::create($form_name, $definition)) {
         drupal_set_message($this->t('Successfully created form "%name".', [
           '%name' => $form_name,
         ]));

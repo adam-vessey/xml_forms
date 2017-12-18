@@ -1,14 +1,13 @@
 <?php
 
-/**
- * @file
- * Class for the XML Document.
- */
+namespace Drupal\xml_form_api;
 
-module_load_include('inc', 'xml_form_api', 'NodeRegistry');
-module_load_include('inc', 'xml_form_api', 'Namespaces');
-module_load_include('inc', 'xml_schema_api', 'Schema');
-module_load_include('inc', 'php_lib', 'String');
+use Drupal\xml_schema_api\Schema;
+
+use DOMDocument;
+use DOMElement;
+use DOMNode;
+use DOMXPath;
 
 /**
  * Class XMLDocument.
@@ -73,6 +72,7 @@ class XMLDocument {
    *   Optional XML to use to generate the document.
    */
   public function __construct($root_name, Namespaces $namespaces, $schema_uri, $xml = NULL) {
+    module_load_include('inc', 'php_lib', 'String');
     $this->namespaces = $namespaces;
     $this->schema = $this->createSchema($schema_uri);
     $this->document = $this->createDocument($root_name, $namespaces, $xml);
@@ -97,6 +97,7 @@ class XMLDocument {
    * Reinitialize this object after it has be un-serialized.
    */
   public function __wakeup() {
+    module_load_include('inc', 'php_lib', 'String');
     $this->document = $this->createDOMDocument();
     $this->document->loadXML($this->xml);
     $this->xpath = new DOMXPath($this->document);
@@ -169,7 +170,7 @@ class XMLDocument {
    * @return string
    *   The URI associated with the prefix.
    */
-  public function getNamespaceURI($prefix = NULL) {
+  public function getNamespaceUri($prefix = NULL) {
     if (isset($prefix)) {
       isset($this->namespaces[$prefix]) ? $this->namespaces[$prefix] : NULL;
     }
@@ -182,7 +183,7 @@ class XMLDocument {
    * @return string
    *   the XMLDocument as a string.
    */
-  public function saveXML() {
+  public function saveXml() {
     return $this->document->saveXML();
   }
 
@@ -229,7 +230,7 @@ class XMLDocument {
    * @return \DOMDocument
    *   The newly created DOMDocument
    */
-  private function createDOMDocument() {
+  private function createDomDocument() {
     $document = new DOMDocument();
     $document->preserveWhiteSpace = FALSE;
     $document->formatOutput = TRUE;

@@ -2,9 +2,10 @@
 
 /**
  * @file
- * This file lists and documents all available hook functions to manipulate
- * data.
+ * Module hook documentation.
  */
+
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * This hook allows modules to add default forms to form builder.
@@ -95,11 +96,9 @@ function hook_xml_form_builder_form_associations() {
  *   Modifications can be made to the form array allowing access to modify
  *   values/attributes of the form elements after the form builder xml is loaded
  *   into the form array.
- *
- * @param array $form_state
+ * @param Drupal\Core\Form\FormStateInterface $form_state
  *   Form State array.
  */
-function hook_xml_form_builder_get_form_modify_definition_alter(&$form,
-                                                                &$form_state) {
+function hook_xml_form_builder_get_form_modify_definition_alter(array &$form, FormStateInterface $form_state) {
 
 }

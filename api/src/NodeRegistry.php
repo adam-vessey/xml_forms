@@ -1,16 +1,16 @@
 <?php
 
-/**
- * @file
- * Defines a Class for associating DOMNodes with the 'self' FormElement context.
- */
+namespace Drupal\xml_form_api;
 
-module_load_include('inc', 'php_lib', 'DOMHelpers');
+use Serializable;
+use DOMNode;
+use DOMDocument;
 
 /**
- * Registers the DOMNodes that defined the 'self' context of FormElements. A
- * FormElement can have at most one DOMNode representing its 'self' context, but
- * a DOMNode can represent the 'self' context for multiple FormElements.
+ * Registers the DOMNodes that defined the 'self' context of FormElements.
+ *
+ * A FormElement can have at most one DOMNode representing its 'self' context,
+ * but a DOMNode can represent the 'self' context for multiple FormElements.
  */
 class NodeRegistry implements Serializable {
 
@@ -60,6 +60,7 @@ class NodeRegistry implements Serializable {
    *   String representing the serialized object.
    */
   public function serialize() {
+    module_load_include('inc', 'php_lib', 'DOMHelpers');
     $data = [];
     foreach ($this->registered as $key => $node) {
       $data[$key] = get_dom_node_xpath($node);

@@ -2,7 +2,7 @@ name: 'Islandora XML Form API'
 description: 'Generates Drupal forms from an XML definition. Allows for creation and editing of XML documents via Drupal forms.'
 package: 'Islandora Dependencies'
 dependencies:
-  - objective_forms
-  - xml_schema_api
+  - :objective_forms
+  - :xml_schema_api
 core: 8.x
 type: module

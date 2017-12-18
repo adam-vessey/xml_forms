@@ -5,7 +5,7 @@
  * XML Form API module.
  */
 
-module_load_include('inc', 'xml_form_api', 'XMLForm');
+use Drupal\xml_form_api\Actions;
 
 /**
  * Register classes for FormProperties.
@@ -18,7 +18,7 @@ function xml_form_api_objectify_properties() {
     'type' => 'inc',
     'module' => 'xml_form_api',
     'name' => 'Actions',
-    'class' => 'Actions',
+    'class' => Actions::class,
   ];
   return $properties;
 }

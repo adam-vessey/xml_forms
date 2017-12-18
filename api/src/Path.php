@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Class for storing and querying XPaths.
- */
+namespace Drupal\xml_form_api;
 
 use Drupal\objective_forms\FormElement;
-
-module_load_include('inc', 'xml_form_api', 'Context');
 
 /**
  * A class used to store/query XPaths.

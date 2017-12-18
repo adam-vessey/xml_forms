@@ -6,6 +6,8 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
+use Drupal\xml_form_api\XMLForm;
+
 /**
  * Render the preview form.
  *
@@ -25,7 +27,9 @@ class XmlFormBuilderPreview extends FormBase {
    *
    */
   public function buildForm(array $form, FormStateInterface $form_state, $form_name = NULL) {
+    dsm(func_get_args(), 'args');
     $form = xml_form_builder_get_form($form, $form_state, $form_name);
+    //dsm($form, 'form');
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => 'Submit',
@@ -37,10 +41,10 @@ class XmlFormBuilderPreview extends FormBase {
    *
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $form_state->loadInclude('xml_form_api', 'inc', 'Create');
     try {
-      $xml_form = new \XMLForm($form_state);
+      $xml_form = new XMLForm($form_state);
       $document = $xml_form->submit($form, $form_state);
+      module_load_include('inc', 'php_lib', 'DOMHelpers');
       dom_document_pretty_print($document->document);
       exit();
     }

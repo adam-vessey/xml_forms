@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * XML Form Generator class.
- */
+namespace Drupal\xml_form_api;
 
 use Drupal\objective_forms\FormElement;
-
-module_load_include('inc', 'php_lib', 'DOMHelpers.inc');
 
 /**
  * Registers DOMNodes to FormElements.
@@ -75,6 +70,7 @@ class XMLFormGenerator {
   public function processElement(FormElement $element) {
     if (!$this->registry->isRegistered($element->hash)) {
       $nodes = $this->findNodes($element);
+      dsm($nodes, $element->hash);
       $node = array_shift($nodes);
       if (isset($node)) {
         $this->registry->register($element->hash, $node);
@@ -104,6 +100,7 @@ class XMLFormGenerator {
     if ($reader) {
       $results = $reader->execute($this->document, $element);
       if ($results) {
+        module_load_include('inc', 'php_lib', 'DOMHelpers');
         return dom_node_list_to_array($results);
       }
     }
@@ -134,12 +131,12 @@ class XMLFormGenerator {
   /**
    * Registers an array of duplicated elements to an array of nodes.
    *
-   * @see XMLFormGenerator::createDuplicates()
-   *
    * @param array $elements
    *   The array of elements to register.
    * @param array $nodes
    *   The array of nodes to register the elements to.
+   *
+   * @see XMLFormGenerator::createDuplicates()
    */
   protected function registerDuplicates(array $elements, array $nodes) {
     $count = count($elements);

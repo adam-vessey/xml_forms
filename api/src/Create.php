@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Create implementation of the ActionInterface.
- */
+namespace Drupal\xml_form_api;
 
 use Drupal\objective_forms\FormElement;
-
-module_load_include('inc', 'xml_form_api', 'ActionInterface');
-module_load_include('inc', 'xml_form_api', 'Path');
-module_load_include('inc', 'xml_schema_api', 'InsertOrderMap');
+use Drupal\xml_schema_api\InsertOrderMap;
 
 /**
  * Create action class for XMLDocuments.
@@ -272,7 +266,7 @@ class Create implements ActionInterface {
    * @return DOMNode
    *   The DOMNode that is created.
    */
-  protected function createXML(XMLDocument $document, $value) {
+  protected function createXml(XMLDocument $document, DOMElement $value) {
     // Sigh... Oh DOM-API, you're so backwards and useless.
     // We have to do this for namespaces to work correctly; there is no clean
     // workaround for this. User will have to put both the prefix and namespace

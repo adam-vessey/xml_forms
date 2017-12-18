@@ -1,13 +1,13 @@
 <?php
 
-/**
- * @file
- * Provides a wrapper class around getting forms from the database or hooks.
- */
+namespace Drupal\xml_form_builder;
 
-module_load_include('inc', 'xml_form_builder', 'XMLFormDatabase');
+use Drupal\xml_form_api\XMLFormDefinition;
+
+use DOMDocument;
+
 /**
- *
+ * Provides a wrapper class around getting forms from the database or hooks.
  */
 class XMLFormRepository extends XMLFormDatabase {
 
@@ -35,14 +35,14 @@ class XMLFormRepository extends XMLFormDatabase {
    * @return bool
    *   TRUE if the given form exists, FALSE otherwise.
    */
-  public static function Exists($form_name) {
-    $in_database = parent::Exists($form_name);
+  public static function exists($form_name) {
+    $in_database = parent::exists($form_name);
 
     if ($in_database) {
       return TRUE;
     }
 
-    $forms = self::getFormsFromHook();
+    $forms = static::getFormsFromHook();
     if (isset($forms[$form_name])) {
       return TRUE;
     }
@@ -59,14 +59,14 @@ class XMLFormRepository extends XMLFormDatabase {
    * @return bool
    *   TRUE if the given form exists, FALSE otherwise.
    */
-  public static function Valid($form_name) {
-    $in_database = parent::Exists($form_name);
+  public static function valid($form_name) {
+    $in_database = parent::exists($form_name);
 
     if ($in_database) {
-      return parent::Valid($form_name);
+      return parent::valid($form_name);
     }
 
-    return self::Get($form_name) !== FALSE;
+    return static::get($form_name) !== FALSE;
   }
 
   /**
@@ -78,13 +78,13 @@ class XMLFormRepository extends XMLFormDatabase {
    * @return DOMDocument
    *   The XML Form Definition if found, FALSE otherwise.
    */
-  public static function Get($form_name) {
-    $in_database = parent::Exists($form_name);
+  public static function get($form_name) {
+    $in_database = parent::exists($form_name);
     if ($in_database) {
-      return parent::Get($form_name);
+      return parent::get($form_name);
     }
 
-    $hooks = self::getFormsFromHook();
+    $hooks = static::getFormsFromHook();
     if (!isset($hooks[$form_name])) {
       return FALSE;
     }
@@ -94,7 +94,6 @@ class XMLFormRepository extends XMLFormDatabase {
       return FALSE;
     }
 
-    module_load_include('inc', 'xml_form_api', 'XMLFormDefinition');
     $definition = new DOMDocument();
     $definition->load($path);
     $version = XMLFormDefinition::getVersion($definition);
@@ -111,16 +110,16 @@ class XMLFormRepository extends XMLFormDatabase {
    *   An array of defined form names, where both the key and the value are the
    *   form's name, e.g. array('name' => 'name').
    */
-  public static function GetNames() {
-    $hook = self::getFormsFromHook();
+  public static function getNames() {
+    $hook = static::getFormsFromHook();
     $hook_names = [];
     foreach ($hook as $key => $array) {
       $hook_names[] = ['name' => $key, 'indb' => FALSE];
     }
-    usort($hook_names, ['XMLFormRepository', 'ComparisonFunction']);
+    usort($hook_names, [__CLASS__, 'comparisonFunction']);
 
-    $db_names = parent::GetNames();
-    usort($hook_names, ['XMLFormRepository', 'ComparisonFunction']);
+    $db_names = parent::getNames();
+    usort($hook_names, [__CLASS__, 'comparisonFunction']);
 
     $names = array_merge($hook_names, $db_names);
 
@@ -138,7 +137,7 @@ class XMLFormRepository extends XMLFormDatabase {
    * @return int
    *   The string comparison as a strnatcasecmp() integer.
    */
-  public static function ComparisonFunction($a, $b) {
+  public static function comparisonFunction($a, $b) {
     return strnatcasecmp($a['name'], $b['name']);
   }
 
@@ -149,11 +148,11 @@ class XMLFormRepository extends XMLFormDatabase {
    *   An array of defined form names, where both the key and the value are the
    *   form's name, e.g. array('name' => 'name').
    */
-  public static function GetValidNames() {
-    $form_names = self::GetNames();
+  public static function getValidNames() {
+    $form_names = static::getNames();
     $valid_names = [];
     foreach ($form_names as $form_name) {
-      if (self::Valid($form_name['name'])) {
+      if (static::valid($form_name['name'])) {
         $valid_names[] = $form_name;
       }
     }
@@ -173,9 +172,9 @@ class XMLFormRepository extends XMLFormDatabase {
    * @return bool
    *   TRUE if successful, otherwise FALSE.
    */
-  public static function Create($form_name, DOMDocument $definition = NULL) {
-    if (!self::Exists($form_name)) {
-      return parent::Create($form_name, $definition);
+  public static function create($form_name, DOMDocument $definition = NULL) {
+    if (!static::exists($form_name)) {
+      return parent::create($form_name, $definition);
     }
     return FALSE;
   }
@@ -191,10 +190,10 @@ class XMLFormRepository extends XMLFormDatabase {
    * @return bool
    *   TRUE if successful FALSE otherwise.
    */
-  public static function Copy($form_name_src, $form_name_dest) {
-    if (self::Exists($form_name_src)) {
-      $definition = self::Get($form_name_src);
-      return self::Create($form_name_dest, $definition);
+  public static function copy($form_name_src, $form_name_dest) {
+    if (static::exists($form_name_src)) {
+      $definition = static::get($form_name_src);
+      return static::create($form_name_dest, $definition);
     }
     return FALSE;
   }

@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Class to implement the Read action.
- */
+namespace Drupal\xml_form_api;
 
 use Drupal\objective_forms\FormElement;
-
-module_load_include('inc', 'xml_form_api', 'ActionInterface');
-module_load_include('inc', 'xml_form_api', 'Path');
 
 /**
  * Read implementation of the ActionInterface class.

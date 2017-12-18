@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Class to prepopulate an XML form.
- */
+namespace Drupal\xml_form_api;
 
 use Drupal\objective_forms\FormElement;
-
-module_load_include('inc', 'xml_form_api', 'XMLDocument');
-module_load_include('inc', 'php_lib', 'DOMHelpers');
 
 /**
  * XML form prepopulator class.
@@ -29,6 +23,7 @@ class XMLFormPrePopulator {
    *   The document to populate.
    */
   public function __construct(XMLDocument $document) {
+    module_load_include('inc', 'php_lib', 'DOMHelpers');
     $this->registry = $document->registry;
   }
 

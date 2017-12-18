@@ -328,6 +328,7 @@ function xml_form_builder_update_7101() {
  */
 function xml_form_builder_update_7102() {
   $t = 't';
+  $output = [];
   $self_transform = [
     'description' => 'A xsl transform for setting the Fedora Object\'s Dublin Core metadata datastream.',
     'type' => 'varchar',
@@ -340,6 +341,7 @@ function xml_form_builder_update_7102() {
   catch (DatabaseSchemaObjectExistsException $e) {
     $output[] = $t('Field "self_transform" already exists.');
   }
+  return implode(' ', $output);
 }
 
 /**

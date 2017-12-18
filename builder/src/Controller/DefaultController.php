@@ -7,7 +7,8 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use XMLFormRepository;
+use Drupal\xml_form_builder\XMLFormRepository;
+use Drupal\xml_form_builder\XMLFormDatabase;
 use AbstractObject;
 
 /**
@@ -24,8 +25,7 @@ class DefaultController extends ControllerBase {
    *   The table to display.
    */
   public function xml_form_builder_main() {
-    module_load_include('inc', 'xml_form_builder', 'XMLFormRepository');
-    $names = XMLFormRepository::GetNames();
+    $names = XMLFormRepository::getNames();
 
     // No forms exist can only create.
     if (count($names) == 0) {
@@ -159,10 +159,9 @@ class DefaultController extends ControllerBase {
    *   The name of the form to download.
    */
   public function xml_form_builder_export($form_name) {
-    module_load_include('inc', 'xml_form_builder', 'XMLFormRepository');
     header('Content-Type: text/xml', TRUE);
     header('Content-Disposition: attachment; filename="' . $form_name . '.xml"');
-    $definition = XMLFormRepository::Get($form_name);
+    $definition = XMLFormRepository::get($form_name);
     $definition->formatOutput = TRUE;
     echo $definition->saveXML();
     exit();
@@ -178,10 +177,9 @@ class DefaultController extends ControllerBase {
    *   The render array for the Form Builder.
    */
   public function xml_form_builder_edit($form_name) {
-    module_load_include('inc', 'xml_form_builder', 'XMLFormDatabase');
     module_load_include('inc', 'xml_form_builder', 'Edit');
 
-    if (!\XMLFormDatabase::Exists($form_name)) {
+    if (!XMLFormDatabase::exists($form_name)) {
       drupal_set_message(t('Form "%name" does not exist.', [
         '%name' => $form_name,
       ]), 'error');
@@ -215,13 +213,11 @@ class DefaultController extends ControllerBase {
    */
   public function xml_form_builder_edit_save($form_name) {
     module_load_include('inc', 'xml_form_builder', 'JSONFormDefinition');
-    module_load_include('inc', 'xml_form_builder', 'XMLFormDatabase');
-    module_load_include('inc', 'xml_form_api', 'XMLFormDefinition');
     try {
       $definition = new \JSONFormDefinition($_POST['data']);
       list($properties, $form) = $definition->getPropertiesAndForm();
-      $definition = \XMLFormDefinitionGenerator::Create($properties, $form);
-      \XMLFormDatabase::Update($form_name, $definition);
+      $definition = XMLFormDefinitionGenerator::create($properties, $form);
+      XMLFormDatabase::update($form_name, $definition);
     }
     catch (Exception $e) {
       $msg = "File: {$e->getFile()}<br/>Line: {$e->getLine()}<br/>Error: {$e->getMessage()}";

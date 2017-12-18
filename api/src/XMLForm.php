@@ -1,9 +1,6 @@
 <?php
 
-/**
- * @file
- * Implementation of the objective_forms Form class.
- */
+namespace Drupal\xml_form_api;
 
 use Drupal\Core\Render\Element;
 use Drupal\Component\Utility\NestedArray;
@@ -12,9 +9,6 @@ use Drupal\Core\Form\FormStateInterface;
 
 use Drupal\objective_forms\FormElement;
 use Drupal\objective_forms\FormValues;
-
-module_load_include('inc', 'xml_form_api', 'XMLDocument');
-module_load_include('inc', 'xml_form_api', 'Actions');
 
 /**
  * The XML Form class.
@@ -47,11 +41,12 @@ class XMLForm extends Form {
    *
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
-   *
    * @param array $parents
    *   An array containing an offset of parents.
+   * @param string $name
+   *   The name of the form from which we were constructed.
    */
-  public function __construct(FormStateInterface $form_state, $parents = [], $name = NULL) {
+  public function __construct(FormStateInterface $form_state, array $parents = [], $name = NULL) {
     parent::__construct([], $form_state, $parents);
     if ($this->storage->initialized) {
       $this->initializeFromStorage();
@@ -90,13 +85,13 @@ class XMLForm extends Form {
    * particular form; on subsequent submit/validation/etc callbacks,
    * Form::initializeFromStorage() will be called.
    *
-   * @throws Exception
-   *   If an attempt is made to initialize a form a second time.
-   *
    * @param array $form
    *   The form to initialize.
    * @param XMLDocument $document
    *   The XML document to initialize.
+   *
+   * @throws Exception
+   *   If an attempt is made to initialize a form a second time.
    */
   public function initialize(array &$form, XMLDocument $document) {
     if (!$this->initialized) {
@@ -126,12 +121,8 @@ class XMLForm extends Form {
    * Generates additional elements based on the XMLDocument's nodes.
    *
    * Called the first time this form is created.
-   *
-   * @return array
-   *   Array of elements generated.
    */
   protected function generate() {
-    module_load_include('inc', 'xml_form_api', 'XMLFormGenerator');
     $generator = new XMLFormGenerator($this, $this->document);
     $generator->generate($this->root);
   }
@@ -142,7 +133,6 @@ class XMLForm extends Form {
    * These elements will not be saved in the storage.
    */
   public function prepopulate() {
-    module_load_include('inc', 'xml_form_api', 'XMLFormPrePopulator');
     $populator = new XMLFormPrePopulator($this->document);
     $populator->prepopulate($this->root);
   }
@@ -159,8 +149,6 @@ class XMLForm extends Form {
    *   An XML document generated from the form.
    */
   public function submit(array &$form_in, FormStateInterface $form_state) {
-    module_load_include('inc', 'xml_form_api', 'XMLFormProcessor');
-
     // Have parent offset so let's grab only the portion of the form to
     // submit!
     if (!empty($this->parents)) {
@@ -192,7 +180,7 @@ class XMLForm extends Form {
    *   An array where the keys are the hash of the FormElement and the value is
    *   the corresponding FormElement.
    */
-  public function flattenDrupalForm($form) {
+  public function flattenDrupalForm(array $form) {
     $flattened = [];
     foreach (Element::children($form) as $key) {
       $child_element = $form[$key];

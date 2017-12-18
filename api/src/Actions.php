@@ -1,15 +1,8 @@
 <?php
 
-/**
- * @file
- * Action class.
- */
+namespace Drupal\xml_form_api;
 
-module_load_include('inc', 'objective_forms', 'FormPropertyInterface');
-module_load_include('inc', 'xml_form_api', 'Create');
-module_load_include('inc', 'xml_form_api', 'Read');
-module_load_include('inc', 'xml_form_api', 'Update');
-module_load_include('inc', 'xml_form_api', 'Delete');
+use Drupal\objective_forms\FormPropertyInterface;
 
 /**
  * Container Class for all actions.
@@ -47,7 +40,7 @@ class Actions implements FormPropertyInterface {
   /**
    * Creates and Actions instance.
    *
-   * @param array $value
+   * @param mixed $value
    *   Array of property values that can be set.
    */
   public function __construct($value) {

@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\xml_form_builder\XMLFormRepository;
 
 /**
  * Validates the name Drupal Form Element.
@@ -18,9 +19,8 @@ use Drupal\Core\Form\FormStateInterface;
  *   The Drupal Form State.
  */
 function xml_form_builder_create_validate_name(array $element, FormStateInterface $form_state) {
-  module_load_include('inc', 'xml_form_builder', 'XMLFormRepository');
   $form_name = $form_state->getValue('form_name');
-  if (XMLFormRepository::Exists($form_name)) {
+  if (XMLFormRepository::exists($form_name)) {
     $error_msg = t('The given form name "%name" is already in use. Form names must be unique.', ['%name' => $form_name]);
     $form_state->setErrorByName('form_name', $error_msg);
   }

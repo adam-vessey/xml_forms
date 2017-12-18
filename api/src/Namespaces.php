@@ -1,30 +1,13 @@
 <?php
 
-/**
- * @file
- * Iterator class for namespaces.
- */
+namespace Drupal\xml_form_api;
 
-/**
- * Exceptions that may occur when building.
- */
-class XMLFormsNamespaceException extends Exception {
+use Drupal\xml_form_api\Exception\XMLFormsNamespaceException;
 
-  /**
-   * Constructor function for the XMLFormsNamespaceException class.
-   *
-   * @param string $message
-   *   A message to pass through from the exception.
-   * @param int $code
-   *   The exception code number.
-   * @param null $previous
-   *   The previous exception in the exception chain.
-   */
-  public function __construct($message = "", $code = 0, $previous = NULL) {
-    parent::__construct($message, $code, $previous);
-  }
-
-}
+use IteratorAggregate;
+use ArrayIterator;
+use DOMElement;
+use DOMNode;
 
 /**
  * This class is meant to encapsulate namespaces.
@@ -76,7 +59,7 @@ class Namespaces implements IteratorAggregate {
    * @throws XMLFormsNamespaceException
    *   When the prefix being searched for isn't defined.
    */
-  public function getURI($prefix) {
+  public function getUri($prefix) {
     if (isset($this->namespaces[$prefix])) {
       return $this->namespaces[$prefix];
     }

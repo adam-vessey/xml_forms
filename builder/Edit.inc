@@ -7,6 +7,9 @@
  * These are used for rendering the Form Builder GUI.
  */
 
+use Drupal\xml_form_api\XMLFormDefinition;
+use Drupal\xml_form_builder\XMLFormDatabase;
+
 /**
  * Includes all the required CSS files needed to render the Form Builder GUI.
  */
@@ -65,10 +68,8 @@ function xml_form_builder_create_element_type_store() {
  *   The name of the form which properties will be used.
  */
 function xml_form_builder_create_properties_store($form_name) {
-  module_load_include('inc', 'xml_form_builder', 'XMLFormDatabase');
   module_load_include('inc', 'xml_form_builder', 'JSONFormDefinitionGenerator');
-  module_load_include('inc', 'xml_form_api', 'XMLFormDefinition');
-  $definition = new XMLFormDefinition(XMLFormDatabase::Get($form_name));
+  $definition = new XMLFormDefinition(XMLFormDatabase::get($form_name));
   $data = JSONFormDefinitionGenerator::GetPropertiesArray($definition->getProperties());
   return [
     '#attached' => [
@@ -89,10 +90,8 @@ function xml_form_builder_create_properties_store($form_name) {
  *   The name of the form which will be used.
  */
 function xml_form_builder_create_element_store($form_name) {
-  module_load_include('inc', 'xml_form_builder', 'XMLFormDatabase');
   module_load_include('inc', 'xml_form_builder', 'JSONFormDefinitionGenerator');
-  module_load_include('inc', 'xml_form_api', 'XMLFormDefinition');
-  $definition = new XMLFormDefinition(XMLFormDatabase::Get($form_name));
+  $definition = new XMLFormDefinition(XMLFormDatabase::get($form_name));
   $data = JSONFormDefinitionGenerator::GetFormArray($definition->getForm());
   return [
     '#attached' => [

@@ -1,12 +1,13 @@
 <?php
 
-/**
- * @file
- * Provides a wrapper class around the database table were forms are stored.
- */
+namespace Drupal\xml_form_builder;
+
+use Drupal\xml_form_api\XMLFormDefinition;
+
+use DOMDocument;
 
 /**
- *
+ * Provides a wrapper class around the database table were forms are stored.
  */
 class XMLFormDatabase {
 
@@ -29,7 +30,7 @@ class XMLFormDatabase {
    * @return bool
    *   TRUE if the given form exists, FALSE otherwise.
    */
-  public static function Exists($form_name) {
+  public static function exists($form_name) {
     // @TODO: integrate 'fancy' 'dynamic' self::table
     $count = db_select('xml_forms', 'xf')
       ->condition('xf.name', $form_name)
@@ -50,9 +51,9 @@ class XMLFormDatabase {
    * @return bool
    *   TRUE if the given form exists, FALSE otherwise.
    */
-  public static function Valid($form_name) {
-    if (self::Exists($form_name)) {
-      return self::Get($form_name) !== FALSE;
+  public static function valid($form_name) {
+    if (static::exists($form_name)) {
+      return static::get($form_name) !== FALSE;
     }
     return FALSE;
   }
@@ -66,14 +67,14 @@ class XMLFormDatabase {
    * @return DOMDocument
    *   The XML Form Definition if found, FALSE otherwise.
    */
-  public static function Get($form_name) {
-    if (self::Exists($form_name)) {
+  public static function get($form_name) {
+    if (static::exists($form_name)) {
       $query = db_query('SELECT form FROM {xml_forms} WHERE name = :name', [':name' => $form_name]);
       $xml = $query->fetchField();
       if (trim($xml) !== '') {
         $definition = new DOMDocument();
         $definition->loadXML($xml);
-        $definition = self::Upgrade($form_name, $definition);
+        $definition = static::upgrade($form_name, $definition);
         return $definition;
       }
     }
@@ -91,13 +92,13 @@ class XMLFormDatabase {
    * @return XMLFormDefinition
    *   The form definition, upgraded to the latest version.
    */
-  protected static function Upgrade($form_name, DOMDocument $definition) {
+  protected static function upgrade($form_name, DOMDocument $definition) {
     module_load_include('inc', 'xml_form_api', 'XMLFormDefinition');
     $version = XMLFormDefinition::getVersion($definition);
     if (!$version->isLatestVersion()) {
       $definition = XMLFormDefinition::upgradeToLatestVersion($definition);
       // Updates to latest.
-      self::Update($form_name, $definition);
+      static::update($form_name, $definition);
     }
     return $definition;
   }
@@ -109,7 +110,7 @@ class XMLFormDatabase {
    *   An array of defined form names, where both the key and the value are the
    *   form's name; e.g. array('name' => 'name').
    */
-  public static function GetNames() {
+  public static function getNames() {
     $names = [];
     $result = db_query('SELECT name FROM {xml_forms}')->fetchCol();
     foreach ($result as $data) {
@@ -125,11 +126,11 @@ class XMLFormDatabase {
    *   An array of defined form names, where both the key and the value are the
    *   form's name, e.g. array('name' => 'name').
    */
-  public static function GetValidNames() {
-    $form_names = self::GetNames();
+  public static function getValidNames() {
+    $form_names = static::getNames();
     $valid_names = [];
     foreach ($form_names as $key => $form_name) {
-      if (self::Valid($form_name)) {
+      if (static::valid($form_name)) {
         $valid_names[$key] = $form_name;
       }
     }
@@ -149,15 +150,15 @@ class XMLFormDatabase {
    * @return bool
    *   TRUE if successful, otherwise FALSE.
    */
-  public static function Create($form_name, DOMDocument $definition = NULL) {
-    if (!self::Exists($form_name)) {
+  public static function create($form_name, DOMDocument $definition = NULL) {
+    if (!static::exists($form_name)) {
       module_load_include('inc', 'xml_form_api', 'XMLFormDefinition');
       $definition = isset($definition) ? $definition : xml_form_api_get_empty_form_definition();
       $definition = XMLFormDefinition::upgradeToLatestVersion($definition);
       $fields = [];
       $fields['name'] = $form_name;
       $fields['form'] = $definition->saveXML();
-      return \Drupal::database()->insert(self::TABLE)->fields($fields)->execute() !== FALSE;
+      return \Drupal::database()->insert(static::TABLE)->fields($fields)->execute() !== FALSE;
     }
     return FALSE;
   }
@@ -173,10 +174,10 @@ class XMLFormDatabase {
    * @return bool
    *   TRUE if successful; FALSE otherwise.
    */
-  public static function Copy($form_name_src, $form_name_dest) {
-    if (self::Exists($form_name_src)) {
-      $definition = self::Get($form_name_src);
-      return self::Create($form_name_dest, $definition);
+  public static function copy($form_name_src, $form_name_dest) {
+    if (static::exists($form_name_src)) {
+      $definition = static::get($form_name_src);
+      return static::create($form_name_dest, $definition);
     }
     return FALSE;
   }
@@ -194,14 +195,13 @@ class XMLFormDatabase {
    * @returns bool
    *   TRUE if successful; FALSE otherwise.
    */
-  public static function Update($form_name, DOMDocument $definition) {
-    if (self::Exists($form_name)) {
-      module_load_include('inc', 'xml_form_api', 'XMLFormDefinition');
+  public static function update($form_name, DOMDocument $definition) {
+    if (static::exists($form_name)) {
       $version = XMLFormDefinition::getVersion($definition);
       if (!$version->isLatestVersion()) {
         $definition = XMLFormDefinition::upgradeToLatestVersion($definition);
       }
-      $num = db_update(self::TABLE)
+      $num = db_update(static::TABLE)
         ->fields(['form' => $definition->saveXML()])
         ->condition('name', $form_name)
         ->execute();
@@ -224,9 +224,9 @@ class XMLFormDatabase {
    * @return bool
    *   TRUE if successful; FALSE otherwise.
    */
-  public static function Delete($form_name) {
-    if (self::Exists($form_name)) {
-      $num = db_delete(self::TABLE)
+  public static function delete($form_name) {
+    if (static::exists($form_name)) {
+      $num = db_delete(static::TABLE)
         ->condition('name', $form_name)
         ->execute();
       if ($num) {

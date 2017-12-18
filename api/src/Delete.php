@@ -1,52 +1,36 @@
 <?php
 
-/**
- * @file
- * Implementation of the ActionInterface to update an element.
- */
-
-module_load_include('inc', 'xml_form_api', 'ActionInterface');
-module_load_include('inc', 'xml_form_api', 'Path');
-module_load_include('inc', 'php_lib', 'DOMHelpers.inc');
+namespace Drupal\xml_form_api;
 
 use Drupal\objective_forms\FormElement;
 
 /**
- * Update implementation class for the Action Interface.
+ * Delete action class for XMLDocuments.
  */
-class Update implements ActionInterface {
+class Delete implements ActionInterface {
 
   /**
-   * Path to the element to update.
+   * Stored XPath to be used for new instances of Delete.
    *
    * @var Path
    */
   protected $path;
 
   /**
-   * Path to the element's definition within its schema.
-   *
-   * @var string
-   */
-  protected $schema;
-
-  /**
-   * Construct Update ActionInterface.
+   * Constructor function for the Delete class.
    *
    * @param array $params
    *   An array containing two elements:
-   *   'path' - the XPath to be used in this instance of Update.
+   *   'path' - the XPath to be used in this instance of Delete.
    *   'context' - an instance of ContextType (__DEFAULT/DOCUMENT/PARENT/SELF).
    */
   public function __construct(array &$params) {
+    module_load_include('inc', 'php_lib', 'DOMHelpers');
     $this->path = new Path($params['path'], new Context(new ContextType($params['context'])));
-    $this->schema = isset($params['schema']) ? $params['schema'] : NULL;
   }
 
   /**
    * Retrieves an array of values that can be passed on to a Drupal form.
-   *
-   * Nigel Sez: Used by the form builder???
    *
    * @return array
    *   The array of return values.
@@ -69,10 +53,13 @@ class Update implements ActionInterface {
    *   The value of the element we want to check.
    *
    * @return bool
-   *   TRUE if the value passed in is set; FALSE otherwise.
+   *   Currently only FALSE.
    */
   public function shouldExecute(XMLDocument $document, FormElement $element, $value = NULL) {
-    return isset($value);
+    // @todo add additional parameters to determine if an element should be
+    // deleted; at the moment, the elements are only deleted if they are removed
+    // from the form.
+    return FALSE;
   }
 
   /**
@@ -86,31 +73,27 @@ class Update implements ActionInterface {
    *   The value of the element we want to check.
    *
    * @return bool
-   *   TRUE.
+   *   Currently only TRUE.
    */
   public function execute(XMLDocument $document, FormElement $element, $value = NULL) {
-    // Filter the value.
-    $value = isset($value) ?
-        htmlspecialchars(html_entity_decode($value, ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8') :
-        NULL;
     $results = $this->path->query($document, $element);
     $results = dom_node_list_to_array($results);
     foreach ($results as $node) {
-      $this->doUpdate($node, $value);
+      $this->doDelete($node);
     }
     return TRUE;
   }
 
   /**
-   * Update the given DOMNode with the provided mixed value.
+   * Deletes a specified DOMNode.
    *
    * @param DOMNode $node
-   *   The DOMNode to update.
-   * @param mixed $value
-   *   The value to update the DOMNode with.
+   *   The DOMNode to delete.
    */
-  protected function doUpdate(DOMNode $node, $value) {
-    $node->nodeValue = $value;
+  protected function doDelete(DOMNode $node) {
+    if (isset($node->parentNode)) {
+      $node->parentNode->removeChild($node);
+    }
   }
 
 }

@@ -1,37 +1,14 @@
 <?php
 
-/**
- * @file
- * Defines several Context related classes.
- *
- * Defines the three types of XPath context that can be used when defining forms
- * (document, parent, self). Also it defines a Class for determining which
- * DOMNode a given context refers to.
- */
+namespace Drupal\xml_form_api;
 
-use Drupal\php_lib\Enum;
 use Drupal\objective_forms\FormElement;
+use Drupal\xml_form_api\Exception\XMLFormsContextDefinitionException;
+use Drupal\xml_form_api\Exception\XMLFormsContextNotFoundException;
 
 /**
- * Enumerated types for Context.
- */
-class ContextType extends Enum {
-  const __DEFAULT = 'document';
-  const DOCUMENT = 'document';
-  const PARENT = 'parent';
-  const SELF = 'self';
-
-  // @deprecated Constants
-  // @codingStandardsIgnoreStart
-  const __default = self::__DEFAULT;
-  const Document = self::DOCUMENT;
-  const Parent = self::PARENT;
-  const Self = self::SELF;
-  // @codingStandardsIgnoreEnd
-
-}
-
-/**
+ * Context info.
+ *
  * Stores the type of context a Path uses, and retrieve the DOMNode a context
  * refers to.
  */
@@ -67,7 +44,7 @@ class Context {
    */
   public function exists(XMLDocument $document, FormElement $element) {
     try {
-      $node = $this->getNode($document->registry, $element);
+      $this->getNode($document->registry, $element);
       return TRUE;
     }
     catch (XMLFormsContextException $e) {
@@ -116,6 +93,7 @@ class Context {
    *   If found the parent node is returned, otherwise NULL.
    */
   protected function getParent(XMLDocument $document, FormElement $element) {
+    //dsm(func_get_args(), 'p');
     $parent = $element->parent;
     while ($parent) {
       $selected_node = isset($parent->actions->read);
@@ -125,6 +103,8 @@ class Context {
         if ($document->registry->isRegistered($parent->hash)) {
           return $document->registry->get($parent->hash);
         }
+        dsm($parent, 'asdf');
+        dsm($document, 'd');
         throw new XMLFormsContextNotFoundException($this->type, $element);
       }
       // Check next Parent.
@@ -162,85 +142,6 @@ class Context {
    */
   public function __toString() {
     return (string) $this->type;
-  }
-
-}
-
-/**
- * Represents exceptions that can occur when looking for the context DOMNode.
- */
-class XMLFormsContextException extends Exception {
-
-  /**
-   * Constructor function for the XMLFormsContextException class.
-   *
-   * @param ContextType $type
-   *   The context type to build an exception for.
-   * @param \Drupal\objective_forms\FormElement $element
-   *   The form element being referred to when the exception is thrown.
-   * @param Exception $message
-   *   The error message to throw.
-   */
-  public function __construct(ContextType $type, FormElement $element, $message) {
-    $variable_description = "The Form Element<br/>";
-    $variable_description .= "&nbsp;Location: '{$element->getLocation()}'<br/>";
-    $variable_description .= "&nbsp;Title: '{$element['#title']}'</br>";
-    $variable_description .= "&nbsp;Type: '{$element['#type']}'</br>";
-    $variable_description .= "&nbsp;Context: '$type->val'</br>";
-    $message = $variable_description . 'Error: ' . $message;
-    parent::__construct($message, 0);
-  }
-
-  /**
-   * String to describe the error.
-   *
-   * @return string
-   *   String to return.
-   */
-  public function __toString() {
-    return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
-  }
-
-}
-
-/**
- * Exception for a mis-configured element context definition.
- */
-class XMLFormsContextDefinitionException extends XMLFormsContextException {
-
-  /**
-   * Constructor function for the XMLFormsContextDefinitionException class.
-   *
-   * @param ContextType $type
-   *   The context type to build an exception for.
-   * @param \Drupal\objective_forms\FormElement $element
-   *   The form element being referred to when the exception is thrown.
-   */
-  public function __construct(ContextType $type, FormElement $element) {
-    $message = "Specifies an XPath context of {$type} but none is defined. Check the form defintion";
-    parent::__construct($type, $element, $message);
-  }
-
-}
-
-/**
- * The given context DOMNode could not be found.
- *
- * In some cases, this is acceptable; in others, it is not.
- */
-class XMLFormsContextNotFoundException extends XMLFormsContextException {
-
-  /**
-   * Constructor function for the XMLFormsContextNotFoundException class.
-   *
-   * @param ContextType $type
-   *   The context type to build an exception for.
-   * @param \Drupal\objective_forms\FormElement $element
-   *   The form element being referred to when the exception is thrown.
-   */
-  public function __construct(ContextType $type, FormElement $element) {
-    $message = "The DOMNode associated with the context {$type->val} was not found.";
-    parent::__construct($type, $element, $message);
   }
 
 }
